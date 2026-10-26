@@ -17,6 +17,9 @@
 #define BNO055_CONFIG_MODE      0x00
 #define BNO055_NDOF_MODE        0x0C
 
+#define BNO055_GYRO_X_LSB 0x14
+
+
 typedef struct
 {
     float heading;
@@ -31,6 +34,9 @@ typedef struct
     float y;
     float z;
 } bno055_quat_t;
+
+
+int bno055_read_gyro_euler(int fd, float gyro_dps[3], bno055_euler_t *e);
 
 int bno055_open(const char *device);
 void bno055_close(int fd);

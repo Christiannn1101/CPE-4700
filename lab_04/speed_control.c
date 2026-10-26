@@ -18,23 +18,26 @@ void speed_control_init(void)
         return;
     }
     // CSV header required by the instructions
-    fprintf(speed_log, "time_ms,target_speed,measured_speed\n");
+    fprintf(speed_log, "time_ms,target_speed,measured_speed(0),measured_speed(1)\n");
     speed_control_active = true;
 }
 
 // Main control function required by the interface
-void speed_control(int motor, double target_speed)
+void speed_control(double target_speed)
 {
     // 1. Get the current measured speed from the encoder
-    double measured_speed = encoder_get_speed(motor);
+    double measured_speed0 = encoder_get_speed(0);
+    double measured_speed1 = encoder_get_speed(1);
 
     // 2. Compute control action to determine the PWM duty cycle (max 0.6)
-    double duty = target_speed / 100.0;
-    if (duty > 0.6) duty = 0.6;
-    if (duty < -0.6) duty = -0.6;
+    // Scaled to max target speed of 60.0 so that 60.0 target = 0.6 PWM duty
+    double duty = target_speed / 100.0; 
+    if (duty > 0.5) duty = 0.5;
+    if (duty < -0.5) duty = -0.5;
 
     // 3. Apply the computed command to the motor
-    pwm_set_duty(motor, duty);
+    pwm_set_duty(1, duty);
+    pwm_set_duty(0, duty);
 }
 
 // Helper function to handle the triangular cycle inside the real-time loop
@@ -45,7 +48,6 @@ int speed_control_run(unsigned int loop_count)
         return 0;
     }
 
-    int motor = 0; // Motor channel (0=Right or 1=Left)
     int t_ms = loop_count;
     double elapsed_seconds = t_ms / 1000.0;
 
@@ -60,25 +62,22 @@ int speed_control_run(unsigned int loop_count)
     double cycle_time = fmod(elapsed_seconds, 2.0);
     double target_speed;
 
-    // Triangular reference generation
     if (cycle_time < 1.0)
         target_speed = 50.0 - 100.0 * cycle_time;
     else
         target_speed = -50.0 + 100.0 * (cycle_time - 1.0);
-    
-    
-
 
     // Get the measured speed
-    double measured_speed = encoder_get_speed(motor);
+    double measured_speed0 = encoder_get_speed(0);
+    double measured_speed1 = encoder_get_speed(1);
 
     // Call the speed control function
-    speed_control(motor, target_speed);
+    speed_control(target_speed);
 
     // Log the data to the CSV file
     if (speed_log != NULL)
     {
-        fprintf(speed_log, "%d,%f,%f\n", t_ms, target_speed, measured_speed);
+        fprintf(speed_log, "%d,%f,%f,%f\n", t_ms, target_speed, measured_speed0, measured_speed1);
     }
 
     return 1; // Continues active

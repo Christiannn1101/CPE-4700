@@ -66,6 +66,7 @@ int main(void){
             // Step test is still active
         //    break;
         //}
+
         if (speed_control_run(loop_count) == 0){
             // The 3 cycles have finished
             break;

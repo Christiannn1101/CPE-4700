@@ -69,6 +69,21 @@ double get_imu_heading()
     return 0.0; // Return a default value or handle the error as needed
 }
 
+
+void get_imu_pitch_and_rate(double *pitch_deg, double *rate_dps)
+{
+    static double last_p = 0.0, last_r = 0.0;
+    bno055_euler_t e;
+    float g[3];
+
+    if (bno055_read_gyro_euler(fd, g, &e) == 0) {
+        last_p = e.pitch;
+        last_r = g[0];          /* X axis = pitch rate; check the sign (below) */
+    }
+    *pitch_deg = last_p;
+    *rate_dps  = last_r;
+}
+
 void imu_cleanup(void)
 {
     bno055_close(fd);

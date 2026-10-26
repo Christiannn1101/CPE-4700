@@ -167,3 +167,20 @@ int bno055_read_calibration(
 
     return 0;
 }
+
+int bno055_read_gyro_euler(int fd, float g[3], bno055_euler_t *e)
+{
+    uint8_t d[12];
+
+    if (read_reg(fd, BNO055_GYRO_X_LSB, d, 12))
+        return -1;
+
+    g[0] = s16(d[0],  d[1])  / 16.0f;   /* deg/s */
+    g[1] = s16(d[2],  d[3])  / 16.0f;
+    g[2] = s16(d[4],  d[5])  / 16.0f;
+
+    e->heading = s16(d[6],  d[7])  / 16.0f;
+    e->roll    = s16(d[8],  d[9])  / 16.0f;
+    e->pitch   = s16(d[10], d[11]) / 16.0f;
+    return 0;
+}

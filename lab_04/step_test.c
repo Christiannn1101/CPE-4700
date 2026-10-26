@@ -54,12 +54,12 @@ int step_test(unsigned int loop_count)
             pwm_set_duty(1, 0); 
             break;
         case 3100:
-            pwm_set_duty(0, -6); 
-            pwm_set_duty(1, -6); 
+            pwm_set_duty(0, -.6); 
+            pwm_set_duty(1, -.6); 
             break;
         case 4100:
-            pwm_set_duty(0, 6); 
-            pwm_set_duty(1, 6); 
+            pwm_set_duty(0, .6); 
+            pwm_set_duty(1, .6); 
             break;
         case 5100:
             step_test_active = false;
